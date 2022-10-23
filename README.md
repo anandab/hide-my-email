@@ -16,7 +16,8 @@ The inspiration for this project was Apple's ["Hide My Email"](https://support.a
 
 1. Run `npm install`
 2. `npx ts-node scripts/setup.ts` to update the config to use your email and domain and update the list of email prefixes if you wish
-3. `cdk deploy`
+3. Log into the AWS console and in SES receiving rules create a new rule called default and mark it active
+4. `cdk deploy`
 
 ## Detailed Instructions
 

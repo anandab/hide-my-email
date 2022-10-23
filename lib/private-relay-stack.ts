@@ -38,7 +38,7 @@ export default class PrivateRelayStack extends Stack {
 
     const mailForwardLambda = new lambda.NodejsFunction(this, 'mail-forward-handler', {
       entry: './lib/lambda-mail.ts',
-      runtime: Runtime.NODEJS_14_X,
+      runtime: Runtime.NODEJS_16_X,
       environment: {
         FWD_TO_EMAIL,
         PRIVATE_RELAY_FROM_SUFFIX,
@@ -67,7 +67,7 @@ export default class PrivateRelayStack extends Stack {
 
     const mailReplyLambda = new lambda.NodejsFunction(this, 'mail-reply-handler', {
       entry: './lib/lambda-reply.ts',
-      runtime: Runtime.NODEJS_14_X,
+      runtime: Runtime.NODEJS_16_X,
       environment: {
         FWD_TO_EMAIL,
         PRIVATE_RELAY_FROM_SUFFIX,
@@ -81,9 +81,8 @@ export default class PrivateRelayStack extends Stack {
       }),
     );
     mailStore.grantRead(mailReplyLambda);
-
-    const ruleSet = new ses.ReceiptRuleSet(this, 'RuleSet');
-    ruleSet.addRule('Fwd', {
+	const activeRuleSet = ses.ReceiptRuleSet.fromReceiptRuleSetName(this, 'RuleSet', 'default');
+    activeRuleSet.addRule('Fwd', {
       recipients: emailPrefixes.map(e => `${e}@${EMAIL_DOMAIN}`),
       actions: [
         // Store in S3 with SNS if large emails expected
@@ -96,7 +95,7 @@ export default class PrivateRelayStack extends Stack {
       enabled: true,
       scanEnabled: true,
     });
-    ruleSet.addRule('Reply', {
+    activeRuleSet.addRule('Reply', {
       recipients: [PRIVATE_RELAY_SUB_DOMAIN],
       actions: [
         // Store in S3 with SNS if large emails expected
